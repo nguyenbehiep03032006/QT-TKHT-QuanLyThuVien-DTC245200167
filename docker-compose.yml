@@ -81,6 +81,29 @@ services:
       - internal_network
       - web_network
 
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: library_loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+    command: -config.file=/etc/loki/loki-config.yml
+    networks:
+      - internal_network
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: library_promtail
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/promtail-config.yml
+    depends_on:
+      - loki
+    networks:
+      - internal_network
+
 networks:
   internal_network:
     internal: true
